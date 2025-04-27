@@ -54,22 +54,73 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
     
     return out
 
-def extract_markdown_images(text: str) -> list[str]:
+def extract_markdown_images(text: str) -> list[tuple[str,str]]:
     return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
-def extract_markdown_links(text: str) -> list[str]:
+def extract_markdown_links(text: str) -> list[tuple[str,str]]:
     return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
-def split_nodes_image(old_nodes):
+def split_nodes_image(old_nodes: list[TextNode]):
     out = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT:
             out.append(node)
             continue
-        else:
-            out.extend()
-    
+        
+        image_links = extract_markdown_images(node.text)
+
+        # This would cause issues if the same image link with the same alt text is present in two different places in the node text,
+        # but with maxsplit = 1 you only ever split on the first instance, so rest is a len 1 list.
+        acc: list[str] = []
+        last = node.text
+        for image_link in image_links:
+            first, *rest = last.split(f"![{image_link[0]}]({image_link[1]})", maxsplit=1)
+            last = rest[0]
+            acc.append(first)
+        if last:
+            acc.append(last)
+        
+        for i in range(len(acc) + len(image_links)):
+            if i % 2 == 0:
+                out.append(TextNode(acc[i//2], TextType.TEXT))
+            else:
+                out.append(TextNode(image_links[i//2][0], TextType.IMAGE, image_links[i//2][1]))
+        
     return out
 
-def split_nodes_link(old_nodes):
-    pass
+def split_nodes_link(old_nodes: list[TextNode]):
+    out: list[TextNode] = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            out.append(node)
+            continue
+        
+        link_links = extract_markdown_links(node.text)
+
+        # This would cause issues if the same image link with the same alt text is present in two different places in the node text,
+        # but with maxsplit = 1 you only ever split on the first instance, so rest is a len 1 list.
+        acc: list[str] = []
+        last = node.text
+        for link_link in link_links:
+            first, *rest = last.split(f"[{link_link[0]}]({link_link[1]})", maxsplit=1)
+            last = rest[0]
+            acc.append(first)
+        if last:
+            acc.append(last)
+        
+        for i in range(len(acc) + len(link_links)):
+            if i % 2 == 0:
+                out.append(TextNode(acc[i//2], TextType.TEXT))
+            else:
+                out.append(TextNode(link_links[i//2][0], TextType.LINK, link_links[i//2][1]))
+        
+    return out
+
+def text_to_textnodes(text):
+    nodes_1 = split_nodes_delimiter([TextNode(text, TextType.TEXT)], "**", TextType.BOLD)
+    nodes_2 = split_nodes_delimiter(nodes_1, "_", TextType.ITALIC)
+    nodes_3 = split_nodes_delimiter(nodes_2, "`", TextType.CODE)
+    nodes_4 = split_nodes_link(nodes_3)
+    nodes_5 = split_nodes_image(nodes_4)
+    return nodes_5
+    
