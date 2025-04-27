@@ -123,4 +123,3 @@ def text_to_textnodes(text):
     nodes_4 = split_nodes_link(nodes_3)
     nodes_5 = split_nodes_image(nodes_4)
     return nodes_5
-    
