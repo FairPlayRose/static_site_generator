@@ -64,7 +64,37 @@ class TestTextNode(unittest.TestCase):
             "<div><span><b>grandchild</b></span></div>",
         )
 
-    def test_to_html_with_siblings(self):
+    def test_to_html_with_siblings_2(self):
+        node = ParentNode(
+            "pre",
+            [
+                LeafNode("code", "code text 1"),
+                LeafNode("code", "code text 2"),
+                LeafNode("code", "code text 3"),
+                LeafNode("code", "code text 4"),
+            ],
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<pre><code>code text 1</code><code>code text 2</code><code>code text 3</code><code>code text 4</code></pre>",
+        )
+
+    def test_to_html_with_code_with_newline(self):
+        node = ParentNode(
+            "pre",
+            [
+                LeafNode("code", "code text\n some more code"),
+                LeafNode("code", "code text 2"),
+                LeafNode("code", "code text 3"),
+                LeafNode("code", "code text 4"),
+            ],
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<pre><code>code text\n some more code</code><code>code text 2</code><code>code text 3</code><code>code text 4</code></pre>",
+        )
+
+    def test_to_html_with_siblings_1(self):
         node = ParentNode(
             "p",
             [

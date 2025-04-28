@@ -1,5 +1,5 @@
 from enum import Enum
-from htmlnode import HTMLNode,LeafNode,ParentNode
+from htmlnode import LeafNode
 from typing import Self
 import re
 
@@ -41,7 +41,7 @@ def text_node_to_html_node(text_node: TextNode):
             return LeafNode("img", None, {"src": text_node.url, "alt": text_node.text})
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType):
-    out = []
+    out: list[TextNode] = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT:
             out.append(node)
@@ -61,7 +61,7 @@ def extract_markdown_links(text: str) -> list[tuple[str,str]]:
     return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
 def split_nodes_image(old_nodes: list[TextNode]):
-    out = []
+    out: list[TextNode] = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT:
             out.append(node)

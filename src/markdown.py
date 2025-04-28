@@ -29,7 +29,7 @@ def is_consecutive(lst: list[tuple[str,str]]):
 def block_to_block_type(markdown: str):
     if re.match(r"#{1,6} ", markdown):
         return BlockType.HEADING
-    elif re.match(r"^```.*?```$", markdown):
+    elif markdown[:3] == "```" and markdown[-3:] == "```":
         return BlockType.CODE
     elif all([re.match(r"^> |\n> ", line) for line in markdown.split('\n')]):
         return BlockType.QUOTE
@@ -39,3 +39,42 @@ def block_to_block_type(markdown: str):
         return BlockType.ORDERED_LIST
     else:
         return BlockType.PARAGRAPH
+    
+def text_to_children(text) -> list[HTMLNode]:
+    text_nodes = text_to_textnodes(text)
+    return [text_node_to_html_node(node) for node in text_nodes]
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+
+        if block == "":
+            continue
+
+        match block_type:
+            case BlockType.CODE:
+                nodes.append(ParentNode("pre", [LeafNode("code", block[4:-4])]))
+            case BlockType.HEADING:
+                head_idx, text = block.split(" ", maxsplit=1)
+                head_count = len(head_idx)
+                nodes.append(ParentNode(f"h{head_count}", text_to_children(text)))
+            case BlockType.QUOTE:
+                texts = block.split("\n")
+                text = " ".join([text[2:] for text in texts])
+                nodes.append(ParentNode("blockquote", [ParentNode("p", text_to_children(text))]))
+            case BlockType.UNORDERED_LIST:
+                texts = block.split("\n")
+                childrens = [text_to_children(text[2:]) for text in texts]
+                nodes.append(ParentNode("ul", [ParentNode("li", children) for children in childrens]))
+            case BlockType.ORDERED_LIST:
+                texts = block.split("\n")
+                childrens = [text_to_children(text[2:]) for text in texts]
+                nodes.append(ParentNode("ol", [ParentNode("li", children) for children in childrens]))
+            case BlockType.PARAGRAPH:
+                texts = block.split("\n")
+                text = " ".join(texts)
+                nodes.append(ParentNode("p", text_to_children(text)))
+    
+    return ParentNode("div", nodes)

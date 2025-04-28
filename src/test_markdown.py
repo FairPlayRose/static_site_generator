@@ -4,7 +4,7 @@ from markdown import *
 
 
 class TestTextNode(unittest.TestCase):
-    def test_markdown_to_blocks(self):
+    def test_markdown_to_blocks_1(self):
         md = """
 This is **bolded** paragraph
 
@@ -24,6 +24,44 @@ This is the same paragraph on a new line
             ],
         )
     
+    def test_markdown_to_blocks_2(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "```\nThis is text that _should_ remain\nthe **same** even with inline stuff\n```",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+    
+    def test_markdown_to_blocks_3(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "```\nThis is text that _should_ remain\nthe **same** even with inline stuff\n```"
+            ],
+        )
+    
     def test_block_type_conversion_heading(self):
         text = "# This is a heading"
         block_type = block_to_block_type(text)
@@ -39,6 +77,11 @@ This is the same paragraph on a new line
 
     def test_block_type_conversion_code(self):
         text = "```This is a code block```"
+        block_type = block_to_block_type(text)
+        self.assertEqual(BlockType.CODE, block_type)
+
+    def test_block_type_conversion_code_2(self):
+        text = "```\nThis is a\n code block\n```"
         block_type = block_to_block_type(text)
         self.assertEqual(BlockType.CODE, block_type)
 
@@ -76,6 +119,38 @@ This is the same paragraph on a new line
         text = "This is just some text, but becomes a paragrafh"
         block_type = block_to_block_type(text)
         self.assertEqual(BlockType.PARAGRAPH, block_type)
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff</code></pre></div>",
+        )
 
 if __name__ == "__main__":
     unittest.main()
