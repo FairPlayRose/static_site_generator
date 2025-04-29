@@ -70,7 +70,7 @@ def markdown_to_html_node(markdown):
                 nodes.append(ParentNode("ul", [ParentNode("li", children) for children in childrens]))
             case BlockType.ORDERED_LIST:
                 texts = block.split("\n")
-                childrens = [text_to_children(text[2:]) for text in texts]
+                childrens = [text_to_children(text[3:]) for text in texts]
                 nodes.append(ParentNode("ol", [ParentNode("li", children) for children in childrens]))
             case BlockType.PARAGRAPH:
                 texts = block.split("\n")
