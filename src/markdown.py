@@ -78,3 +78,11 @@ def markdown_to_html_node(markdown):
                 nodes.append(ParentNode("p", text_to_children(text)))
     
     return ParentNode("div", nodes)
+
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if re.match(r"# ", block):
+            return block[2:]
+    
+    raise Exception("Markdown has no title")

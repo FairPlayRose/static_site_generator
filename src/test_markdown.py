@@ -170,5 +170,43 @@ the **same** even with inline stuff
             "<div><blockquote><p>This is a quote and the next line is here, together with the last one.</p></blockquote><ol><li>item</li><li>items</li><li>itemss</li></ol></div>",
         )
 
+    def test_extract_title(self):
+        md = """
+# This is the title
+
+> This is a quote
+> and the next line is here,
+> together with the last one.
+
+## this is not the title
+
+1. item
+2. items
+3. itemss
+"""
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "This is the title"
+        )
+
+    def test_extract_title_bad(self):
+        md = """
+> This is a quote
+> and the next line is here,
+> together with the last one.
+
+## this is not the title
+
+1. item
+2. items
+3. itemss
+"""
+        try:
+            extract_title(md)
+        except Exception:
+            return
+        
+
 if __name__ == "__main__":
     unittest.main()
