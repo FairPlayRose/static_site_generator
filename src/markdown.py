@@ -31,9 +31,9 @@ def block_to_block_type(markdown: str):
         return BlockType.HEADING
     elif markdown[:3] == "```" and markdown[-3:] == "```":
         return BlockType.CODE
-    elif all([re.match(r"^> |\n> ", line) for line in markdown.split('\n')]):
+    elif all([re.match(r"^>", line) for line in markdown.split('\n')]):
         return BlockType.QUOTE
-    elif all([re.match(r"^- |\n- ", line) for line in markdown.split('\n')]):
+    elif all([re.match(r"^-", line) for line in markdown.split('\n')]):
         return BlockType.UNORDERED_LIST
     elif is_consecutive(re.findall(r"(\n|^)(\d*)\.", markdown)):
         return BlockType.ORDERED_LIST
@@ -62,15 +62,15 @@ def markdown_to_html_node(markdown):
                 nodes.append(ParentNode(f"h{head_count}", text_to_children(text)))
             case BlockType.QUOTE:
                 texts = block.split("\n")
-                text = " ".join([text[2:] for text in texts])
-                nodes.append(ParentNode("blockquote", [ParentNode("p", text_to_children(text))]))
+                text = " ".join([text[2:] for text in texts if text[2:] != ""])
+                nodes.append(ParentNode("blockquote", text_to_children(text)))
             case BlockType.UNORDERED_LIST:
                 texts = block.split("\n")
-                childrens = [text_to_children(text[2:]) for text in texts]
+                childrens = [text_to_children(text[2:]) for text in texts if text[2:] != ""]
                 nodes.append(ParentNode("ul", [ParentNode("li", children) for children in childrens]))
             case BlockType.ORDERED_LIST:
                 texts = block.split("\n")
-                childrens = [text_to_children(text[3:]) for text in texts]
+                childrens = [text_to_children(text[3:]) for text in texts if text[3:] != ""]
                 nodes.append(ParentNode("ol", [ParentNode("li", children) for children in childrens]))
             case BlockType.PARAGRAPH:
                 texts = block.split("\n")

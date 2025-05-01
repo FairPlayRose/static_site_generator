@@ -201,6 +201,19 @@ class TestTextNode(unittest.TestCase):
             new_nodes,
         )
     
+    def test_split_images_only(self):
+        node = TextNode(
+            "![image](https://i.imgur.com/zjjcJKZ.png)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            ],
+            new_nodes,
+        )
+    
     def test_split_link_link_end(self):
         node = TextNode(
             "This is text with a [link to a site](https://i.imgur.com/zjjcJKZ.png) and another [link to a different site](https://i.imgur.com/3elNhQu.png)",

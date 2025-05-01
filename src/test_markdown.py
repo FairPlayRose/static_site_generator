@@ -170,6 +170,24 @@ the **same** even with inline stuff
             "<div><blockquote><p>This is a quote and the next line is here, together with the last one.</p></blockquote><ol><li>item</li><li>items</li><li>itemss</li></ol></div>",
         )
 
+    def test_quote(self):
+        md = """
+> This is a quote
+>
+> together with the last one.
+
+1. item
+2. items
+3. itemss
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><blockquote><p>This is a quote together with the last one.</p></blockquote><ol><li>item</li><li>items</li><li>itemss</li></ol></div>",
+        )
+
     def test_extract_title(self):
         md = """
 # This is the title
@@ -189,6 +207,8 @@ the **same** even with inline stuff
             title,
             "This is the title"
         )
+
+        
 
     def test_extract_title_bad(self):
         md = """

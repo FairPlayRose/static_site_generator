@@ -1,5 +1,5 @@
 from textnode import TextNode, TextType
-from markdown import extract_title
+from markdown import extract_title, markdown_to_html_node
 import re
 import os
 import shutil
@@ -52,9 +52,23 @@ def static_to_public():
 
     copy_files_to_different_dir(static_path, public_path)
 
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
+    from_content = open(os.path.abspath(from_path)).read()
+    template = open(os.path.abspath(template_path)).read()
+
+    html_node = markdown_to_html_node(from_content)
+    html_from_content = html_node.to_html()
+    title = extract_title(from_content)
+
+    full_html = template.replace("{{ Title }}", title).replace("{{ Content }}", html_from_content)
+
+    with open(os.path.abspath(dest_path), "w") as t:
+        t.write(full_html)
 
 def main():
     static_to_public()
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 main()

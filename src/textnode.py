@@ -38,7 +38,7 @@ def text_node_to_html_node(text_node: TextNode):
         case TextType.LINK:
             return LeafNode("a", text_node.text, {"href": text_node.url})
         case TextType.IMAGE:
-            return LeafNode("img", None, {"src": text_node.url, "alt": text_node.text})
+            return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType):
     out: list[TextNode] = []
@@ -82,7 +82,8 @@ def split_nodes_image(old_nodes: list[TextNode]):
         
         for i in range(len(acc) + len(image_links)):
             if i % 2 == 0:
-                out.append(TextNode(acc[i//2], TextType.TEXT))
+                if acc[i//2]:
+                    out.append(TextNode(acc[i//2], TextType.TEXT))
             else:
                 out.append(TextNode(image_links[i//2][0], TextType.IMAGE, image_links[i//2][1]))
         
@@ -110,7 +111,8 @@ def split_nodes_link(old_nodes: list[TextNode]):
         
         for i in range(len(acc) + len(link_links)):
             if i % 2 == 0:
-                out.append(TextNode(acc[i//2], TextType.TEXT))
+                if acc[i//2]:
+                    out.append(TextNode(acc[i//2], TextType.TEXT))
             else:
                 out.append(TextNode(link_links[i//2][0], TextType.LINK, link_links[i//2][1]))
         
