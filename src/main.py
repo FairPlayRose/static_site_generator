@@ -25,7 +25,6 @@ def copy_files_to_different_dir(source_path, target_path):
         file_or_dir_path = os.path.join(source_path, newpath)
         if os.path.isfile(file_or_dir_path):
             shutil.copy(file_or_dir_path, target_path)
-            print(os.path.join(source_path, newpath))
         else:
             os.mkdir(os.path.join(target_path, newpath))
             copy_files_to_different_dir(file_or_dir_path, os.path.join(target_path, newpath))
@@ -67,8 +66,33 @@ def generate_page(from_path, template_path, dest_path):
     with open(os.path.abspath(dest_path), "w") as t:
         t.write(full_html)
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    dir_path_content_abs = os.path.abspath(dir_path_content)
+
+    dest_dir_path_abs = os.path.abspath(dest_dir_path)
+    #print(dest_dir_path_abs)
+
+
+    for newpath in os.listdir(dir_path_content_abs):
+        dir_path_content_abs_new = os.path.join(dir_path_content_abs, newpath)
+        #print(dir_path_content_abs_new)
+        if os.path.isfile(dir_path_content_abs_new):
+            filename, filetype = os.path.splitext(newpath)
+            #print(filename)
+            if filetype != ".md":
+                continue
+            dest_dir_path_abs_new = os.path.join(dest_dir_path_abs, filename + ".html")
+            #print(dest_dir_path_abs_new)
+            generate_page(dir_path_content_abs_new, template_path, dest_dir_path_abs_new)
+        
+        else:
+            dest_dir_path_new = os.path.join(dest_dir_path, newpath)
+            dir_path_content_new = os.path.join(dir_path_content, newpath)
+            os.mkdir(os.path.join(dest_dir_path_abs, newpath))
+            generate_pages_recursive(dir_path_content_new, template_path, dest_dir_path_new)
+
 def main():
     static_to_public()
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content/", "template.html", "public/")
 
 main()
