@@ -41,7 +41,7 @@ def delete_files_and_paths(path: str):
     os.rmdir(path)
 
 def static_to_public():
-    public_path = os.path.abspath("public/")
+    public_path = os.path.abspath("docs/")
     static_path = os.path.abspath("static/")
 
     delete_files_and_paths(public_path)
